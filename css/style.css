@@ -4,3 +4,12 @@ body {
     padding: 10px;
     color: #333;
 }
+.container {
+    text-align: center;
+}
+#question-container {
+    text-align: center;
+}
+ul {
+    list-style: none;
+}

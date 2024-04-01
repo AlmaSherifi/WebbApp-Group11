@@ -4,11 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/bootstrap.css">
     <title>Futurama Frågesport</title>
 </head>
 <body>
-    <h1>Futurama Frågesport</h1>
-    <div id="question-container"></div>
+    <div class="container">
+        <h1>Futurama Frågesport</h1>
+        <button id="start-quiz-button" type="button" class="btn btn-primary">Start Quiz</button>
+    </div>
+  
+    <div id="question-container">
+         <h3 id="question"></h3>
+        <ul id="answers"></ul>
+    </div>
+   
+   
 
     <div id="character-container"></div>
 
