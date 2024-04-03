@@ -75,13 +75,18 @@
 })(); */
 
 (async () => {
+    
     try {
         // Hämta frågor och svarsalternativ från API
         const questionsResponse = await fetch('https://da-demo.github.io/api/futurama/questions/');
-        const questionsData = await questionsResponse.json();
+        const questionsData = await questionsResponse.json();        
+
+        const startQuizButton = document.getElementById('start-quiz-button');       
+        startQuizButton.addEventListener('click', () => StartQuiz(questionsData));
+        
         
         // Funktion för att visa första frågan
-        const showFirstQuestion = () => {
+        /*const showFirstQuestion = () => {
             // Hämta elementet för frågan i HTML
             const questionHeader = document.getElementById('question');
             
@@ -114,16 +119,81 @@
 
                 // Lägg till svarsalternativet till ul-elementet
                 answersList.appendChild(answerItem);
+                
             });
-        };
+        };*/
         
-        const startQuizButton = document.getElementById('start-quiz-button');
-        
-        startQuizButton.addEventListener('click', showFirstQuestion);
+        /*const startQuizButton = document.getElementById('start-quiz-button');       
+        startQuizButton.addEventListener('click', showFirstQuestion(questionsData));*/        
         
     } catch (error) {
         console.error("An error occurred:", error);
     }
+    
 })();
 
+//Startar Quizzet
+function StartQuiz(data){
+    let question_counter = 0;
+    //Så att första frågan kommer upp
+    question_counter = CreateQuestionPage(data, question_counter);
+    const nextBtn = document.getElementById('Answear-Button');
+    ChangeNextBtnClasses(nextBtn);
+    nextBtn.addEventListener('click', () => {
+        CreateQuestionPage(data, question_counter)
+        question_counter++;
+    });
+}
+//Ändrar utseendet på NextQuestion Knappen
+function ChangeNextBtnClasses(btn){
+    btn.classList.remove("collapse");
+    btn.classList.add("btn");
+    btn.classList.add("btn-secondary");
+}
 
+function CreateQuestionPage(data, counter){
+    // Hämta elementet för frågan i HTML
+    const questionHeader = document.getElementById('question');
+            
+    // Fyll innehållet med frågan från API
+    questionHeader.textContent = data[counter].question; // Första frågan i listan
+    
+    // Hämta elementet för svarsalternativen i HTML
+    const answersList = document.getElementById('answers');
+
+    //Tar bort alla förgående children från förra frågan
+    while(answersList.firstChild){
+        answersList.removeChild(answersList.firstChild);
+    }
+    // Loopa igenom varje svarsalternativ och skapa HTML-element för dem
+    data[counter].possibleAnswers.forEach((answer, index) => {
+
+        // Skapa ett li-element för svarsalternativet
+        const answerItem = document.createElement('li');
+        
+        // Skapa ett input-element för radioknappen
+        const radioButton = document.createElement('input');
+        radioButton.type = 'radio';
+        radioButton.name = 'answer'; // Namnet ska vara samma för alla alternativ i en fråga
+        
+        const answerLabel = document.createElement('label');
+        answerLabel.textContent = `${String.fromCharCode(65 + index)}. ${answer}`; // Använd A, B, C, D som alternativsnummer, om index är 0 så menas det med A osv.
+
+        //döljer startquiz knappen när man startar quizet
+        const startQuizButton = document.getElementById('start-quiz-button');
+        startQuizButton.style.display = 'none';
+        
+        // Lägg till radioknappen och labeln i li-elementet
+        answerItem.appendChild(radioButton);
+        answerItem.appendChild(answerLabel);
+
+        // Lägg till svarsalternativet till ul-elementet
+        answersList.appendChild(answerItem);        
+    });
+    return Increment_QuestionCounter(counter);
+}
+
+//Ökar countern för vilken fråga som ska visas
+function Increment_QuestionCounter(counter){
+    return counter + 1;
+}
