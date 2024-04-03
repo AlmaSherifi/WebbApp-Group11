@@ -32,6 +32,7 @@ function StartQuiz(data){
             }else {
                 //om alla frågor besvarats så kan man visa resultatet eller liknande här
             }
+
     });
 }
 //Ändrar utseendet på NextQuestion Knappen
@@ -42,6 +43,44 @@ function ChangeNextBtnClasses(btn){
 }
 
 //funktion för att skapa en fråga
+//Kollar om något svar är valdt
+function CheckIfAnswearIsSelected(){
+    //Hämtar alla radiobuttons
+    const radioButtons = document.querySelectorAll('input[type="radio"][name="answer"');
+    let selected = false;
+
+    //Går igenom alla för att se om de är valda
+    radioButtons.forEach((btn) =>{        
+        if(btn.checked){
+            selected = true;            
+        }
+    })
+    //Om ingen är vald skapar den ett error message
+    if(!selected){
+        const messageParent = document.getElementById('button-container');
+        //Kollar om det finns ett error message        
+        const existingMessage = document.getElementById('answer-validation');
+        //tar bort förgående error message
+        if(existingMessage){
+            messageParent.removeChild(existingMessage);
+        }
+
+        //Skapar error message och appendar det till button-container
+        const message = document.createElement("div");
+        message.id = "answer-validation";
+        message.innerHTML = "Please select an answear";
+        messageParent.appendChild(message)
+        return false;
+    }
+    //tar bort förgående error message om man svarar korrekt
+    const existingMessage = document.getElementById('answer-validation');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+    return true;
+}
+
+
 function CreateQuestionPage(data, counter){
     // Hämta elementet för frågan i HTML
     const questionHeader = document.getElementById('question');
