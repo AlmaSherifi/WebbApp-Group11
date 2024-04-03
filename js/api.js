@@ -26,13 +26,16 @@ function StartQuiz(data){
     const nextBtn = document.getElementById('Answear-Button');
     ChangeNextBtnClasses(nextBtn);
     nextBtn.addEventListener('click', () => {
-        if(question_counter < 10) {
-            CreateQuestionPage(data, question_counter);
-            question_counter++; 
-            }else {
-                //om alla frågor besvarats så kan man visa resultatet eller liknande här
-            }
+        if(CheckIfAnswearIsSelected()){
 
+                CreateQuestionPage(data, question_counter)
+                question_counter++;
+                if(question_counter < 10) {
+        
+                }else {
+                //om alla frågor besvarats så kan man visa resultatet eller liknande här
+                }
+            }    
     });
 }
 //Ändrar utseendet på NextQuestion Knappen
