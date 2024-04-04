@@ -1,100 +1,109 @@
 (async () => {
     try {
-        // Hämta frågor och svarsalternativ från API
         const questionsResponse = await fetch('https://da-demo.github.io/api/futurama/questions/');
         const questionsData = await questionsResponse.json();        
 
-        // Begränsar antalet frågor till 10 och blandar dem
         const shuffledQuestions = questionsData.slice(0, 10);
 
-        // Referens till HTML-elementen
         const questionContainer = document.getElementById('question-container');
         const startQuizButton = document.getElementById('start-quiz-button');
 
-        // Skapa en knapp för att gå vidare till nästa fråga
         const nextButton = document.createElement('button');
         nextButton.textContent = 'Next question';
-        nextButton.style.display = 'none'; // Göm knappen i början
+        nextButton.style.display = 'none';
         nextButton.classList.add('btn', 'btn-primary');
         nextButton.id = 'next-button';
 
-        let currentQuestionIndex = 0; // Håller koll på index för den aktuella frågan
+        let currentQuestionIndex = 0;
+        let harBesvarats = false;
 
-        // Funktion för att visa en fråga
+        let rättaSvar = localStorage.getItem('rättaSvar') ? parseInt(localStorage.getItem('rättaSvar')) : 0;
+        let felaSvar = localStorage.getItem('felaSvar') ? parseInt(localStorage.getItem('felaSvar')) : 0;
+        let totalaFrågor = localStorage.getItem('totalaFrågor') ? parseInt(localStorage.getItem('totalaFrågor')) : 0;
+
+        document.getElementById('rätta-svar').innerText = rättaSvar;
+        document.getElementById('fela-svar').innerText = felaSvar;
+        document.getElementById('totala-frågor').innerText = totalaFrågor;
+
+        function uppdateraStatistik(rätt) {
+            if (!harBesvarats) {
+                totalaFrågor++;
+                if (rätt) {
+                    rättaSvar++;
+                } else {
+                    felaSvar++;
+                }
+                localStorage.setItem('totalaFrågor', totalaFrågor);
+                localStorage.setItem('rättaSvar', rättaSvar);
+                localStorage.setItem('felaSvar', felaSvar);
+                
+                document.getElementById('rätta-svar').innerText = rättaSvar;
+                document.getElementById('fela-svar').innerText = felaSvar;
+                document.getElementById('totala-frågor').innerText = totalaFrågor;
+                
+                harBesvarats = true;
+                nextButton.disabled = false;
+            }
+        }
+
         function displayQuestion(question) {
-            // Rensa tidigare innehåll
+            harBesvarats = false;
             questionContainer.innerHTML = '';
-
-            // Skapa frågeelement
             const questionElement = document.createElement('div');
             questionElement.classList.add('question');
-            questionElement.innerHTML = `
-                <h2>Question ${currentQuestionIndex + 1}:</h2>
-                <p>${question.question}</p>
-            `;
+            questionElement.innerHTML = `<h2>Question ${currentQuestionIndex + 1}:</h2><p>${question.question}</p>`;
 
-            // Skapa svarsalternativ för frågan
-            const answersContainer = document.createElement('div');
-            answersContainer.classList.add('answers-container');
-            const answerButtons = []; // Skapa en array för att lagra referenser till knapparna
             question.possibleAnswers.forEach(answer => {
                 const answerButton = document.createElement('button');
-                answerButton.classList.add('btn', 'btn-primary');
+                answerButton.classList.add('btn', 'btn-primary', 'answer-button');
                 answerButton.textContent = answer;
-
-                // Lägg till händelselyssnare för svarsalternativ
-                answerButton.addEventListener('click', () => {
-                    checkAnswer(answer, question.correctAnswer, answerButtons);
-                    nextButton.disabled = false;
-                });
-
-                answersContainer.appendChild(answerButton);
-                answerButtons.push(answerButton); // Lägg till knappen i arrayen
+                answerButton.onclick = () => checkAnswer(answer, question.correctAnswer, question.possibleAnswers);
+                questionElement.appendChild(answerButton);
             });
 
-            questionElement.appendChild(answersContainer);
             questionContainer.appendChild(questionElement);
-            questionContainer.appendChild(nextButton); // Flytta knappen för nästa fråga inuti questionContainer
+            questionContainer.appendChild(nextButton);
+            nextButton.style.display = 'block';
         }
 
-        // Funktion för att starta quiz
-        function StartQuiz() {
-            startQuizButton.style.display = 'none'; // Göm startknappen när quizen börjar
-            displayQuestion(shuffledQuestions[currentQuestionIndex]);
-            nextButton.style.display = 'block'; // Visa knappen när användaren startar quizen
-            nextButton.disabled = true; // Inaktivera knappen tills användaren väljer ett svar
-        }
-
-        // Funktion för att kontrollera svaret
-        function checkAnswer(selectedAnswer, correctAnswer, answerButtons) {
+        function checkAnswer(selectedAnswer, correctAnswer, possibleAnswers) {
+            const answerButtons = document.querySelectorAll('.answer-button');
             answerButtons.forEach(btn => {
                 if (btn.textContent === correctAnswer) {
                     btn.style.backgroundColor = 'green';
                 } else {
                     btn.style.backgroundColor = 'red';
                 }
+                btn.disabled = true;
             });
+            uppdateraStatistik(selectedAnswer === correctAnswer);
         }
 
-        // Funktion för att gå vidare till nästa fråga
-        function goToNextQuestion() {
-            currentQuestionIndex++;
-            if (currentQuestionIndex < shuffledQuestions.length) {
+        startQuizButton.addEventListener('click', () => {
+            startQuizButton.style.display = 'none';
+            displayQuestion(shuffledQuestions[currentQuestionIndex]);
+        });
+
+        nextButton.addEventListener('click', () => {
+            if (currentQuestionIndex + 1 < shuffledQuestions.length) {
+                currentQuestionIndex++;
                 displayQuestion(shuffledQuestions[currentQuestionIndex]);
-                nextButton.disabled = true; // Inaktivera knappen tills användaren väljer ett svar för nästa fråga
+                nextButton.disabled = true; // The user must choose an answer for the new question
             } else {
-                alert('Du har besvarat alla frågor!');
+                // Enhanced completion message with statistics
+                const resultatMeddelande = `<p>You have completed the quiz!</p>
+                    <p>Total Questions Answered: ${totalaFrågor}</p>
+                    <p>Correct Answers: ${rättaSvar}</p>
+                    <p>Incorrect Answers: ${felaSvar}</p>`;
+                questionContainer.innerHTML = resultatMeddelande;
+                nextButton.style.display = 'none';
+                startQuizButton.textContent = 'Restart Quiz';
+                startQuizButton.style.display = 'block';
+                startQuizButton.onclick = () => location.reload(); // Add a simple way to restart the quiz
             }
-        }
-
-        // Lägg till händelselyssnare för knappen för nästa fråga
-        nextButton.addEventListener('click', goToNextQuestion);
-
-        // Lägg till händelselyssnare för startknappen
-        startQuizButton.addEventListener('click', StartQuiz);
+        });
 
     } catch (error) {
-        console.error("Ett fel inträffade:", error);
+        console.error("A mistake occurred:", error);
     }
 })();
-
