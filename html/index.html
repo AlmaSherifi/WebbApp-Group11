@@ -10,22 +10,18 @@
 <body>
     <div class="container">
         <h1>Futurama Quiz</h1>
+        <div id="statistik">
+            <p>Total Questions Answered: <span id="total-answered">0</span></p>
+            <p>Correct Answers: <span id="rätta-svar">0</span></p>
+            <p>Incorrect Answers: <span id="fela-svar">0</span></p>
+        </div>
+        
         <button id="start-quiz-button" type="button" class="btn btn-primary">Start Quiz</button>
     </div>
   
-    <div id="question-container">
-         <h3 id="question"></h3>
-        <ul id="answers"></ul>
-        <div id="button-container">
-            <button id="Answear-Button" class="collapse">Next question</button>
-        </div>
+    <div id="question-container" class="mt-4">
+        <!-- Questions and answer options will be injected here by JavaScript -->
     </div>
-
-    
-   
-   
-
-    <div id="character-container"></div>
 
     <script src="/js/api.js"></script>
 </body>
