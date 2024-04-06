@@ -29,7 +29,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const answerButton = document.createElement('button');
             answerButton.classList.add('btn', 'btn-primary', 'answer-button');
             answerButton.textContent = answer;
-            answerButton.addEventListener('click', () => checkAnswer(answer, question.correctAnswer));
+
+            //Kollar ifall svaren stämmer, ifall question.correctAnswer från Api:et är en integer 
+            //gör vi om den till en string för att tolkas korrekt
+            answerButton.addEventListener('click', () => checkAnswer(answer, question.correctAnswer.toString()));
             questionElement.appendChild(answerButton);
         });
 
